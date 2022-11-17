@@ -37,7 +37,6 @@ pub struct NewUser {
 #[derive(Deserialize, AsChangeset)]
 #[diesel(table_name = users)]
 pub struct UpdateUser {
-    pub id: String,
     pub username: Option<String>,
     pub email: Option<String>,
     pub password: Option<String>,
@@ -72,7 +71,7 @@ impl User {
         Ok(result)
     }
 
-    pub fn update(mut data: UpdateUser) -> Result<User, ApiError> {
+    pub fn update(mut data: UpdateUser, id: String) -> Result<User, ApiError> {
         let mut connection = db::connection()?;
 
         data.updated_at = Some(Utc::now().naive_utc());
@@ -81,11 +80,11 @@ impl User {
             data.password = Some(User::hash_password_str(&password)?);
         }
 
-        update(users::table.find(&data.id))
+        update(users::table.find(id.clone()))
             .set(&data)
             .execute(&mut connection)?;
 
-        let result = users::table.find(data.id).first(&mut connection)?;
+        let result = users::table.find(id).first(&mut connection)?;
 
         Ok(result)
     }

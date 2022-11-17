@@ -32,7 +32,6 @@ pub struct NewTask {
 #[derive(Deserialize, AsChangeset)]
 #[diesel(table_name = tasks)]
 pub struct UpdateTask {
-    pub id: String,
     pub title: Option<String>,
     pub description: Option<String>,
     pub completed: Option<bool>,
@@ -65,13 +64,13 @@ impl Task {
         Ok(result)
     }
 
-    pub fn update(mut data: UpdateTask) -> Result<Task, ApiError> {
+    pub fn update(mut data: UpdateTask, id: String) -> Result<Task, ApiError> {
         let mut connection = db::connection()?;
         data.updated_at = Some(Utc::now().naive_utc());
-        update(tasks::table.find(data.id.clone()))
+        update(tasks::table.find(id.clone()))
             .set(&data)
             .execute(&mut connection)?;
-        let result = tasks::table.find(data.id).first(&mut connection)?;
+        let result = tasks::table.find(id).first(&mut connection)?;
         Ok(result)
     }
 

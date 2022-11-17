@@ -14,8 +14,11 @@ pub async fn get_user_by_id(id: web::Path<String>) -> Result<HttpResponse, ApiEr
     Ok(HttpResponse::Ok().json(user))
 }
 
-pub async fn update_user(user: web::Json<UpdateUser>) -> Result<HttpResponse, ApiError> {
-    let updated_user = User::update(user.into_inner())?;
+pub async fn update_user(
+    user: web::Json<UpdateUser>,
+    id: web::Path<String>,
+) -> Result<HttpResponse, ApiError> {
+    let updated_user = User::update(user.into_inner(), id.into_inner())?;
     Ok(HttpResponse::Ok().json(updated_user))
 }
 

@@ -36,14 +36,15 @@ pub async fn get_task_by_id(id: web::Path<String>) -> Result<HttpResponse, ApiEr
 pub async fn update_task(
     task: web::Json<UpdateTask>,
     session: Session,
+    id: web::Path<String>,
 ) -> Result<HttpResponse, ApiError> {
     let user_id: Option<String> = session.get("user_id")?;
     if let Some(_) = user_id {
-        let task_user_id = Task::find(task.id.clone())?.user_id;
+        let task_user_id = Task::find(id.clone())?.user_id;
         if task_user_id != user_id.unwrap() {
             return Err(ApiError::new(401, "Unauthorized".to_string()));
         }
-        let task = Task::update(task.into_inner())?;
+        let task = Task::update(task.into_inner(), id.into_inner())?;
         Ok(HttpResponse::Ok().json(task))
     } else {
         Err(ApiError::new(401, "Unauthorized".to_string()))
