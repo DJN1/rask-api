@@ -40,10 +40,11 @@ async fn main() -> std::io::Result<()> {
             )
             .configure(routes::user::route::init)
             .configure(routes::auth::route::init)
+            .configure(routes::task::route::init)
             .wrap(Logger::default())
     })
     .bind(format!("{}:{}", app_host, app_port))?;
-    eprintln!("Listening on http://{}:{}", app_host, app_port);
+    eprintln!("Server running on http://{}:{}", app_host, app_port);
 
     return server.run().await;
 }
