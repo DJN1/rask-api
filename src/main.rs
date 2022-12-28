@@ -1,7 +1,9 @@
 extern crate dotenvy;
+use actix_cors::Cors;
 use actix_session::{
     config::PersistentSession, storage::RedisActorSessionStore, SessionMiddleware,
 };
+use actix_web::http;
 use actix_web::middleware::Logger;
 use actix_web::{cookie::time::Duration, App, HttpServer};
 use dotenvy::dotenv;
@@ -24,10 +26,17 @@ async fn main() -> std::io::Result<()> {
 
     let redis_host = std::env::var("REDIS_HOST").expect("REDIS_HOST must be set");
     let redis_port = std::env::var("REDIS_PORT").expect("REDIS_PORT must be set");
+    let ui_url = std::env::var("UI_URL").expect("UI_URL must be set for frontend");
     let private_key = actix_web::cookie::Key::generate();
 
     let server = HttpServer::new(move || {
+        let cors = Cors::default()
+            .allowed_origin(ui_url.as_str())
+            .allowed_methods(vec!["DELETE", "GET", "OPTIONS", "POST", "PUT"])
+            .allowed_header(http::header::CONTENT_TYPE);
+
         App::new()
+            .wrap(cors)
             .wrap(
                 SessionMiddleware::builder(
                     RedisActorSessionStore::new(format!("{}:{}", redis_host, redis_port)),
